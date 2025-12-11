@@ -8,8 +8,6 @@ import lombok.Setter;
 import java.util.ArrayList;
 
 
-@NoArgsConstructor
-
 public class Lobby {
 
     private ArrayList<LobbyEntry> entries = new ArrayList<LobbyEntry>();
@@ -21,6 +19,9 @@ public class Lobby {
         this.name = name;
         this.host = host;
         this.hostSessionID = hostSessionID;
+    }
+    public Lobby(){
+
     }
 
     public ArrayList<LobbyEntry> getEntries() {

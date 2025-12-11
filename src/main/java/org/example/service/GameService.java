@@ -80,7 +80,7 @@ public class GameService {
         Map<String, Object> message = new HashMap<>();
         message.put("type", "GAME_STATE");
         message.put("data", gameState);
-        System.out.println("Broadcasting game state to " + connectionManager.getConnectionCount() + " connections - Spaceships: " + gameState.getSpaceships().size());
+//        System.out.println("Broadcasting game state to " + connectionManager.getConnectionCount() + " connections - Spaceships: " + gameState.getSpaceships().size());
         connectionManager.broadcast(message, objectMapper);
     }
     private void sendPlayerInfo(String sessionId, String playerId, String username) {

@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 @Table(name = "players")
 public class PlayerEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(unique = true, nullable = false)
     private String username;
     
