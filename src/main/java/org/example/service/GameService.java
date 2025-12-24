@@ -24,11 +24,15 @@ public class GameService {
     @Autowired
     private ConnectionManager connectionManager;
     
+    @Autowired
+    private LobbiesService lobbiesService;
+    
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Map<String, ClientSession> sessions;
     private GameState gameState;
     private Map<String, Long> lastShotTime;
     private long lastUpdateTime;
+    private String currentLobbyId; // Track which lobby started this game
     
     public GameService() {
         this.sessions = new ConcurrentHashMap<>();
@@ -37,15 +41,18 @@ public class GameService {
         this.lastUpdateTime = System.currentTimeMillis();
     }
 
-    public void addPlayerToGame(String sessionId, String username, Channel ct) {
+    public void addPlayerToGame(String sessionId, String username, Channel ct, String lobbyId) {
         // Reset game state if starting a new game
         if (gameState.isGameOver() || gameState.getSpaceships().isEmpty()) {
             gameState = new GameState();
             lastShotTime.clear();
             leaderboardService.broadcastLeaderboard();
-            System.out.println("Starting new game...");
+            currentLobbyId = lobbyId; // Track which lobby started this game
+            System.out.println("Starting new game from lobby: " + lobbyId);
         }
 
+        // Track this player's session so we can determine winners/losers later
+        sessions.put(sessionId, new ClientSession(sessionId, username));
 
         // Create spaceship at random position
         Random random = new Random();
@@ -270,6 +277,22 @@ public class GameService {
                     
                     System.out.println("Game Over! Winner: " + winnerSession.getUsername() + " with score: " + winner.getScore());
                     broadcastGameState(); // Broadcast final state
+                    
+                    // Destroy the lobby that started this game
+                    if (currentLobbyId != null) {
+                        lobbiesService.findById(currentLobbyId).ifPresent(lobby -> {
+                            lobbiesService.removeLobby(lobby);
+                            // Broadcast lobby removal to all clients
+                            Map<String, Object> message = new HashMap<>();
+                            message.put("type", "LOBBY_REMOVED");
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("lobbyId", currentLobbyId);
+                            message.put("data", data);
+                            connectionManager.broadcast(message, objectMapper);
+                            System.out.println("Lobby " + currentLobbyId + " destroyed after game ended");
+                        });
+                        currentLobbyId = null;
+                    }
                 }
             }
         }

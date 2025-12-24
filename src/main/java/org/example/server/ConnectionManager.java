@@ -13,11 +13,15 @@ public class ConnectionManager {
     private final Map<String, Channel> sessionToChannel = new ConcurrentHashMap<>();
     private final Map<Channel, String> channelToSession = new ConcurrentHashMap<>();
     private final Map<String, String> sessionToUsername = new ConcurrentHashMap<>();
+    private final Map<String, String> usernameToSession = new ConcurrentHashMap<>();
     
     public void addConnection(String sessionId, Channel channel, String username) {
         sessionToChannel.put(sessionId, channel);
         channelToSession.put(channel, sessionId);
         sessionToUsername.put(sessionId, username);
+        if (username != null) {
+            usernameToSession.put(username, sessionId);
+        }
         System.out.println("Connection added: " + sessionId + " (" + username + ")");
     }
     
@@ -26,7 +30,10 @@ public class ConnectionManager {
         if (channel != null) {
             channelToSession.remove(channel);
         }
-        sessionToUsername.remove(sessionId);
+        String username = sessionToUsername.remove(sessionId);
+        if (username != null) {
+            usernameToSession.remove(username);
+        }
         System.out.println("Connection removed: " + sessionId);
     }
     
@@ -40,6 +47,10 @@ public class ConnectionManager {
     
     public String getUsername(String sessionId) {
         return sessionToUsername.get(sessionId);
+    }
+
+    public String getSessionIdByUsername(String username) {
+        return usernameToSession.get(username);
     }
     
     public void sendToSession(String sessionId, Object message, ObjectMapper objectMapper) {

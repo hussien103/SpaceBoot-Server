@@ -138,7 +138,8 @@ public class GameWebSocketHandler extends SimpleChannelInboundHandler<WebSocketF
             return;
         }
 
-        gameService.addPlayerToGame(sessionId, username, null);
+        // Direct game start (not from lobby) - pass null for lobbyId
+        gameService.addPlayerToGame(sessionId, username, connectionManager.getChannel(sessionId), null);
     }
     private void handleInput(String sessionId, Map<String, Object> data) {
         if (sessionId == null) return;

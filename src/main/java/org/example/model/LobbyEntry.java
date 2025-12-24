@@ -7,13 +7,14 @@ public class LobbyEntry {
 
     private String username;
     private int totalScore;
+    private boolean ready;
 
     public LobbyEntry(){
 
     }
     public LobbyEntry(PlayerEntity player) {
         this.username = player.getUsername();
-        this.totalScore = getTotalScore();
+        this.totalScore = player.getTotalScore();
     }
     public String getUsername() {
         return this.username;
@@ -26,6 +27,14 @@ public class LobbyEntry {
     }
     public void setTotalScore(int totalScore) {
         this.totalScore = totalScore;
+    }
+
+    public boolean isReady() {
+        return ready;
+    }
+
+    public void setReady(boolean ready) {
+        this.ready = ready;
     }
 
 }
